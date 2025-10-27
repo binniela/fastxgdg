@@ -1,65 +1,150 @@
-import Image from "next/image";
+"use client"
+
+import { useState } from "react"
+import { SearchForm } from "@/components/search-form"
+import { ResultsDisplay } from "@/components/results-display"
+import Image from "next/image"
 
 export default function Home() {
+  const [query, setQuery] = useState("")
+  const [sqlQuery, setSqlQuery] = useState("")
+  const [results, setResults] = useState<any[]>([])
+  const [injectionAttempt, setInjectionAttempt] = useState("")
+
+  const handleSearch = (searchTerm: string) => {
+    setQuery(searchTerm)
+
+    // Simulate vulnerable SQL query construction
+    const vulnerableQuery = `SELECT * FROM users WHERE username = '${searchTerm}'`
+    setSqlQuery(vulnerableQuery)
+
+    // Detect and store injection attempts
+    const detectedInjection = detectInjection(searchTerm)
+    setInjectionAttempt(detectedInjection)
+
+    // Simulate database results based on input
+    const mockResults = simulateQuery(searchTerm)
+    setResults(mockResults)
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b bg-white px-6 py-4">
+        <div className="flex items-center">
+          <Image src="/cpp-logo.svg" alt="Cal Poly Pomona" width={200} height={50} className="h-12 w-auto" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      <main className="flex-1 bg-gradient-to-r from-[#c69c3a] via-[#a8b566] to-[#6b9e78] px-4 py-12">
+        <div className="mx-auto max-w-2xl">
+          {/* Search Form */}
+          <SearchForm onSearch={handleSearch} />
+
+          {/* Results Display */}
+          {sqlQuery && <ResultsDisplay sqlQuery={sqlQuery} results={results} originalQuery={query} injectionAttempt={injectionAttempt} />}
         </div>
       </main>
+
+      <footer className="bg-[#1e5631] px-6 py-8 text-white">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-4">
+            <Image
+              src="/cpp-logo.svg"
+              alt="Cal Poly Pomona"
+              width={200}
+              height={50}
+              className="h-10 w-auto brightness-0 invert"
+            />
+          </div>
+          <div className="flex flex-wrap gap-6 text-sm">
+            <a href="#" className="hover:underline">
+              Feedback
+            </a>
+            <a href="#" className="hover:underline">
+              Privacy
+            </a>
+            <a href="#" className="hover:underline">
+              Accessibility
+            </a>
+            <a href="#" className="hover:underline">
+              Document Readers
+            </a>
+          </div>
+          <p className="mt-4 text-sm text-gray-300">
+            Copyright © California State Polytechnic University, Pomona. All Rights Reserved
+          </p>
+          <p className="text-sm text-gray-300">A campus of The California State University.</p>
+        </div>
+      </footer>
     </div>
-  );
+  )
+}
+
+// Detect SQL injection attempts
+function detectInjection(input: string): string {
+  const lowerInput = input.toLowerCase()
+  
+  if (lowerInput.includes("' or '1'='1") || lowerInput.includes("' or 1=1")) {
+    return "Classic SQL Injection: ' OR '1'='1 - Bypasses authentication by making the WHERE clause always true"
+  }
+  
+  if (lowerInput.includes("admin'--") || lowerInput.includes("admin' --")) {
+    return "Comment Injection: admin'-- - Uses SQL comments to ignore password check"
+  }
+  
+  if (lowerInput.includes("union")) {
+    return "UNION Injection: Attempts to combine results from multiple tables to extract additional data"
+  }
+  
+  if (lowerInput.includes("drop") || lowerInput.includes("delete") || lowerInput.includes("update")) {
+    return "Destructive Injection: Attempts to modify or destroy database data"
+  }
+  
+  if (lowerInput.includes(";")) {
+    return "Statement Termination: Uses semicolon to end current query and execute additional commands"
+  }
+  
+  return ""
+}
+
+// Simulate database query results
+function simulateQuery(input: string): any[] {
+  const mockUsers = [
+    { id: 1, username: "admin", email: "admin@example.com", role: "administrator" },
+    { id: 2, username: "john_doe", email: "john@example.com", role: "user" },
+    { id: 3, username: "jane_smith", email: "jane@example.com", role: "user" },
+    { id: 4, username: "bob_wilson", email: "bob@example.com", role: "moderator" },
+  ]
+
+  // Check for SQL injection patterns
+  const lowerInput = input.toLowerCase()
+
+  // Simulate SQL injection: ' OR '1'='1
+  if (lowerInput.includes("' or '1'='1") || lowerInput.includes("' or 1=1")) {
+    return mockUsers // Return all users (injection successful!)
+  }
+
+  // Simulate SQL injection: admin'--
+  if (lowerInput.includes("admin'--") || lowerInput.includes("admin' --")) {
+    return [mockUsers[0]] // Return admin user
+  }
+
+  // Simulate UNION injection
+  if (lowerInput.includes("union")) {
+    return [...mockUsers, { id: 99, username: "INJECTED_DATA", email: "hacked@evil.com", role: "COMPROMISED" }]
+  }
+
+  // Simulate destructive commands (show error)
+  if (lowerInput.includes("drop") || lowerInput.includes("delete") || lowerInput.includes("update")) {
+    return [{ id: 0, username: "ERROR", email: "Database operation failed", role: "SYSTEM_ERROR" }]
+  }
+
+  // Handle empty input
+  if (!input.trim()) {
+    return []
+  }
+
+  // Normal search
+  const normalizedInput = input.replace(/'/g, "").toLowerCase()
+  return mockUsers.filter((user) => user.username.toLowerCase().includes(normalizedInput))
 }

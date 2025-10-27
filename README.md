@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FastXGDG - SQL Injection Demonstration
+
+This is an educational web application built with Next.js that demonstrates SQL injection vulnerabilities in a controlled environment. It simulates a Cal Poly Pomona login system that is intentionally vulnerable to various SQL injection attacks.
+
+## ⚠️ Educational Purpose Only
+
+**This application is designed for educational purposes to teach about SQL injection vulnerabilities. Never use these techniques on systems you don't own or without explicit permission!**
+
+## Features
+
+- **Vulnerable Login Form**: Simulates a real login system with SQL injection vulnerabilities
+- **Real-time SQL Query Display**: Shows how user input is directly inserted into SQL queries
+- **Injection Detection**: Identifies and explains different types of SQL injection attempts
+- **Educational Feedback**: Provides detailed explanations of each injection type
+- **Multiple Attack Vectors**: Supports various SQL injection techniques
 
 ## Getting Started
 
-First, run the development server:
-
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install --legacy-peer-deps
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Open [http://localhost:3000](http://localhost:3000) with your browser
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Try various SQL injection payloads in the BroncoName field (see `SQL_INJECTION_EXAMPLES.md`)
 
-## Learn More
+## Quick Test Examples
 
-To learn more about Next.js, take a look at the following resources:
+Try these in the BroncoName field:
+- `' OR '1'='1` - Authentication bypass
+- `admin'--` - Comment injection
+- `' UNION SELECT 1,2,3--` - Union-based injection
+- `'; DROP TABLE users;--` - Destructive command (shows error)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/app` - Next.js app directory with main page and layout
+- `/components` - React components including form and results display
+- `/components/ui` - Reusable UI components (shadcn/ui)
+- `/lib` - Utility functions
+- `/public` - Static assets including Cal Poly Pomona logo
+- `SQL_INJECTION_EXAMPLES.md` - Comprehensive list of injection payloads to test
 
-## Deploy on Vercel
+## Technologies Used
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Next.js 16** - React framework
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **shadcn/ui** - UI components
+- **Lucide React** - Icons
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Learning Objectives
+
+After using this application, you should understand:
+- How SQL injection vulnerabilities occur
+- Different types of SQL injection attacks
+- Why input validation and parameterized queries are essential
+- How to identify potential injection attempts
+- The importance of secure coding practices
+
+## Security Best Practices (What NOT to do)
+
+This application demonstrates several security anti-patterns:
+- ❌ Direct string concatenation in SQL queries
+- ❌ No input validation or sanitization
+- ❌ No parameterized queries
+- ❌ No proper error handling
+
+## Proper Security Implementation
+
+In a real application, you should:
+- ✅ Use parameterized queries/prepared statements
+- ✅ Validate and sanitize all user input
+- ✅ Implement proper error handling
+- ✅ Use least privilege database access
+- ✅ Implement proper authentication and authorization
+
+## Contributing
+
+This is an educational project. Feel free to submit issues or pull requests to improve the learning experience.
+
+## License
+
+This project is for educational purposes only.
